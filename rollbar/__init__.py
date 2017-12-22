@@ -998,7 +998,7 @@ def _build_request_data(request):
 
     # django rest framework
     if RestFrameworkRequest and isinstance(request, RestFrameworkRequest):
-        return _build_django_request_data(request)
+        return _build_rest_framework_request_data(request)
 
     # werkzeug (flask)
     if WerkzeugRequest and isinstance(request, WerkzeugRequest):
@@ -1070,6 +1070,19 @@ def _build_django_request_data(request):
         'method': request.method,
         'GET': dict(request.GET),
         'POST': dict(request.POST),
+        'user_ip': _wsgi_extract_user_ip(request.environ),
+    }
+
+    request_data['headers'] = _extract_wsgi_headers(request.environ.items())
+
+    return request_data
+
+def _build_rest_framework_request_data(request):
+    request_data = {
+        'url': request.build_absolute_uri(),
+        'method': request.method,
+        'query_params': dict(request.query_params),
+        'data': dict(request.data),
         'user_ip': _wsgi_extract_user_ip(request.environ),
     }
 
